@@ -34,8 +34,8 @@ module RubyPlc
         @steps.each {|s| s.start }
       end
 
-      def reset
-        @steps.each {|s| s.reset }
+      def reset(mode = :all)
+        @steps.each {|s| s.reset(mode) }
       end
     end
   end

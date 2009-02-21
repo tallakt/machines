@@ -49,7 +49,7 @@ module RubyPlc
         end
       end
 
-      def reset
+      def reset(mode = nil)
         active = false
         end_duration
         call_if @on_reset_proc

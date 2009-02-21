@@ -54,9 +54,9 @@ module RubyPlc
         @up.start
       end
 
-      def reset
-        @up.reset
-        @down.reset
+      def reset(mode = :all)
+        @up.reset(mode)
+        @down.reset(mode)
       end
     end
   end

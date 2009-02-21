@@ -56,9 +56,10 @@ module RubyPlc
         @current_step && @steps[@current_step]
       end
 
-      def reset
+      def reset(mode = :all)
+        @steps.each {|s| s.reset(mode) } if mode == :all
+        @steps[0..@current_step_index].each {|s| s.reset(mode) } if (mode == :used && @current_step_index)
         @current_step_index = nil
-        @steps.each {|s| s.reset }
       end
 
       private

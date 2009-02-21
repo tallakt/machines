@@ -48,8 +48,8 @@ module RubyPlc
         end
       end
 
-      def reset
-        @branches.each {|br| br.last.reset }
+      def reset(mode = :all)
+        @branches.each {|br| br.last.reset(mode) }
       end
 
 
