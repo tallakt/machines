@@ -1,5 +1,5 @@
 module RubyPlc
-  module Physical
+  module Signals
     class ValSignal < DiscreteSignal
       def initialize
         super 
@@ -20,6 +20,10 @@ module RubyPlc
           @v = false
           data_change v if old_v
         end
+      end
+
+      def sink(signal)
+        signal.on_change { v = signal.v }
       end
     end
   end

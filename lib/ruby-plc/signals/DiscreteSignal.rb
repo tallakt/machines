@@ -10,11 +10,17 @@ module RubyPlc
       end
 
       def ton(time)
-        # TODO
+        timer = Timer.new time
+        on_re { timer.start }
+        on_fe { timer.reset }
+        timer.at_end { yield }
       end
 
       def tof(time)
-        # TODO
+        timer = Timer.new time
+        on_fe { timer.start }
+        on_re { timer.reset }
+        timer.at_end { yield }
       end
 
       def &&(other)

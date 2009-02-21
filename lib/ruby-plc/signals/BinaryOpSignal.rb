@@ -1,3 +1,5 @@
+require 'ruby-plc/signals/discrete_signal'
+
 module RubyPlc
   module Physical
     class BinaryOpSignal < DiscreteSignal
