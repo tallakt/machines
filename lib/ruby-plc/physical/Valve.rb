@@ -1,8 +1,8 @@
 module RubyPlc
   module Physical
-    attr_reader :name, :description, :interlocks
-
     class Valve
+      attr_reader :name, :description, :interlocks
+
       def initialize(name = nil, description = nil, options = {})
         @name, @description, @options = name, description, options
         @interlocks = Interlocks.new
