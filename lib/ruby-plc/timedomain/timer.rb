@@ -1,5 +1,5 @@
 module RubyPlc
-  module Timers
+  module TimeDomain
     class Timer
       attr_reader :time
 
@@ -11,14 +11,17 @@ module RubyPlc
 
       def elapsed
         if @start_time
-          Time::now - start
+          Sequencer::now - start
         else
           nil
         end
       end
 
       def start
-        @start_time = Time::now
+        @start_time = Sequencer::now
+        Sequencer::wait_until @start_time + @time, self do
+          wait_done
+        end
       end
 
       def at_end(&block)
@@ -27,6 +30,7 @@ module RubyPlc
 
       def reset
         @start_time = nil
+        Sequencer
       end
 
       def active?
@@ -37,11 +41,11 @@ module RubyPlc
         not active?
       end
 
-      def run
-        if elapsed >= @time
-          @start_time = nil
-          @listeners.each {|l| l.call }
-        end
+      private 
+
+      def wait_done
+        @start_time = nil
+        @listeners.each {|l| l.call }
       end
     end
   end

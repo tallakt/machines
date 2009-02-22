@@ -5,7 +5,7 @@ module RubyPlc
 
       def initialize(name = nil)
         @name = name
-        @on_enter_proc, @on_exit_proc, @on_run_proc, @continue_when_proc, @on_reset_proc = nil
+        @on_enter_proc, @on_exit_proc, @continue_when_proc, @on_reset_proc = nil
         @active = false
         @start_time = nil
         @prev_duration = nil
@@ -20,32 +20,29 @@ module RubyPlc
         @on_enter_proc = &block
       end
 
-      def on_run(&block)
-        @on_run_proc = &block
-      end
-
       def on_reset(&block)
         @on_reset_block = &block
       end
 
-      def continue_when(&block)
-        @continue_when_proc = &block
-      end
-
       def start
         @active = true
-        @start_time = Time.now
+        @start_time = Sequencer.now
         call_if @on_enter_proc
+        continue if @continue_when_proc && @continue_when_proc.call
       end
 
-      def run
+      def continue
         if active?
-          call_if @on_run_proc
-          if should_continue?
-            call_if @on_exit_proc
-            @active = false
-            end_duration
-          end
+          call_if @on_exit_proc
+          @active = false
+          end_duration
+        end
+      end
+      
+      def continue_on(signal)
+        signal.on_re do
+          @continue_when_proc = Proc.new { signal.v }
+          continue
         end
       end
 
@@ -64,7 +61,7 @@ module RubyPlc
       end
 
       def duration
-        @start_time && (Time.now - @start_time)
+        @start_time && (Sequencer.now - @start_time)
       end
 
       private
@@ -74,16 +71,8 @@ module RubyPlc
       end
 
       def end_duration
-        @prev_duration = Time.now - @start_time
+        @prev_duration = Sequencer.now - @start_time
         @start_time = nil
-      end
-
-      def should_continue?
-        if @continue_when_proc)
-          @continue_when_proc.call
-        else
-          true
-        end
       end
     end
   end
