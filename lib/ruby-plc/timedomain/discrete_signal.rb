@@ -1,3 +1,7 @@
+include 'ruby-plc/timedomain/timer'
+include 'ruby-plc/timedomain/and_signal'
+include 'ruby-plc/timedomain/or_signal'
+
 module RubyPlc
   module Physical
     module DiscreteSignal

@@ -1,3 +1,5 @@
+include 'ruby-plc/timedomain/binary_op_signal'
+
 module RubyPlc
   module Physical
     class OrSignal < BinaryOpSignal

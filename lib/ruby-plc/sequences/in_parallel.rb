@@ -1,9 +1,13 @@
+include 'ruby_plc/sequences/step_listeners'
+
 module RubyPlc
   module Sequences
     class InParallel
+      include StepListeners
       attr_reader :name
 
       def initialize(name = nil)
+        init_step_listeners
         @name = name
         @steps = []
         yield self if block_given?      
@@ -15,10 +19,10 @@ module RubyPlc
         else
            @steps << s
         end
-      end
-
-      def run
-        @steps.each {|s| s.run }
+        step = @steps.last
+        step.on_exit do
+          notify_exit if finished?
+        end
       end
 
       def finished?
@@ -31,11 +35,13 @@ module RubyPlc
       end
 
       def start
+        notify_enter
         @steps.each {|s| s.start }
       end
 
       def reset(mode = :all)
         @steps.each {|s| s.reset(mode) }
+        notify_reset
       end
     end
   end

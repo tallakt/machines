@@ -2,12 +2,22 @@ module RubyPlc
   module Physical
     class Motor
       attr_reader :name, :description, :interlocks
+      attr_accessor :start_out, :contactor
 
       def initialize(name = nil, description = nil)
         @name, @description = name, description
         @interlocks = Interlocks.new
         @manual = false
+        @startup_timer = Timer.new 500
         yield self if block_given?
+      end
+
+      def startup_time
+        @startup_timer.time
+      end
+
+      def startup_time=(t)
+        @startup_timer.time = t
       end
 
       def start(mode = :auto)

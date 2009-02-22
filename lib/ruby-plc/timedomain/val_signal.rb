@@ -1,3 +1,5 @@
+include 'ruby-plc/timedomain/discrete_signal'
+
 module RubyPlc
   module Signals
     class ValSignal < DiscreteSignal
