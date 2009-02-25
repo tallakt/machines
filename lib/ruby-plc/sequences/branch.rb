@@ -1,6 +1,6 @@
 include 'ruby_plc/sequences/step_listeners'
 
-mmodule RubyPlc
+module RubyPlc
   module Sequences
     class Branch
       include StepListeners

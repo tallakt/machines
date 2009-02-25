@@ -17,6 +17,15 @@ mmodule RubyPlc
         @current_step_index = nil # index of current step
         @options = options
         yield self if block_given?      
+        if @options[:auto_start]
+          Sequencer::at_once { start }
+        end
+        if @options[:cyclic]
+          on_exit do 
+            Sequencer::at_once { start }
+          end
+        end
+
       end
 
       def step(s)

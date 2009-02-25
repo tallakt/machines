@@ -1,15 +1,17 @@
 include 'ruby-plc/timedomain/timer'
 include 'ruby-plc/timedomain/and_signal'
 include 'ruby-plc/timedomain/or_signal'
+include 'ruby-plc/etc/notify'
 
 module RubyPlc
   module Physical
     module DiscreteSignal
+      extend Notify
+
       attr_accessor :name, :description
+      notify :re, :fe, :change
 
       def initialize
-        @re_listeners = []
-        @fe_listeners = []
         @name, @description = nil
       end
 
@@ -35,22 +37,10 @@ module RubyPlc
         OrSignal.new(self, other)
       end
 
-      def on_re(&block)
-        @re_listeners << block
-      end
-
-      def on_fe(&block)
-        @fe_listeners << block
-      end
-
-      def on_change(&block)
-        @fe_listeners << block
-        @re_listeners << block
-      end
-
       def data_change(value)
-        @re_listeners.each {|l| l.call } if value
-        @fe_listeners.each {|l| l.call } unless value
+        notify_re if value
+        notify_fe unless value
+        notify_change
       end
     end
   end
