@@ -1,11 +1,13 @@
 module RubyPlc
   module Sequences
     class WaitStep < Step
+      attr_accessor :timeout
+
       def initialize(timeout, name = nil)
         super name
         @timeout = timeout
-        continue_when { duration > @timeout }
-        end
+        t = Timer.new(timeout) { continue! }
+        on_reset { t.reset }
       end
     end
   end

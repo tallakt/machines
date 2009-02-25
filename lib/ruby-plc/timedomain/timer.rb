@@ -1,15 +1,22 @@
 include 'ruby-plc/timedomain/sequencer'
+include 'ruby-plc/etc/notify'
 
 module RubyPlc
   module TimeDomain
     class Timer
+      extend Notify
+
+      notify :finish
+
       def initialize(time)
         @time = time
         @start_time = nil
         @listeners = []
+        on_finish { yield } if block_given?
       end
 
       def time=(t)
+        # todo support analog signals
         @time = t
         if @start_time
           Sequencer::cancel self
@@ -34,10 +41,6 @@ module RubyPlc
         do_wait
       end
 
-      def at_end(&block)
-        @listeners << block
-      end
-
       def reset
         @start_time = nil
         Sequencer
@@ -53,14 +56,10 @@ module RubyPlc
 
       private 
 
-      def wait_done
-        @start_time = nil
-        @listeners.each {|l| l.call }
-      end
-
       def do_wait
         Sequencer::wait_until @start_time + @time, self do
-          wait_done
+          @start_time = nil
+          notify_finished
         end
       end
     end

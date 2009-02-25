@@ -1,42 +1,35 @@
 module Notify
-  @debug = nil
-  class<<self
-    # force Notification to show up in stack backtraces of delegated methods
-    attr_accessor :debug
-  end
+  def notify(*names)
+    names.each do |name|
+      n = name.to_s
+      listeners = "@notify_#{n}_listeners" 
+      module_eval <<-EOS
+        #{listeners} = nil
 
-  def notify(name)
-    n = name.to_s
-    listeners = "@notify_#{n}_listeners" 
-    module_eval(<<-EOS, '(__NOTIFICATION__)', 1)
-      #{listeners} = nil
-
-    
-      def notify_#{n}
-        exceptions = nil
-        if #{listeners}
-          #{listeners}.each do |l|
-            begin
-              |l| l.call
-            rescue Exception => ex
-              $@.delete_if{|s| /^\\(__NOTIFICATION__\\):/ =~ s} unless Notification::debug
-              exceptions ||= []
-              exceptions << ex
+      
+        def notify_#{n}(*args)
+          errors = nil
+          if #{listeners}
+            #{listeners}.each do |l|
+              begin
+                l.call(*args)
+              rescue Exception => ex
+                errors ||= []
+                errors << ex
+              end
+            end
+            if errors && respond_to?(:handle_notify_error)
+              handle_notify_error(errors)
             end
           end
-          if exceptions && respond_to? :handle_notify_exception
-            handle_notify_exception(exceptions)
-          end
         end
-      end
-      
-      def on_#{n}(&proc)
-        #{listeners} ||= []
-        #{listeners} << proc
-      end
-
-      private :notify_#{n}
-    EOS
+        
+        def on_#{n}(&proc)
+          #{listeners} ||= []
+          #{listeners} << proc
+        end
+      EOS
+    end
   end
 end
 

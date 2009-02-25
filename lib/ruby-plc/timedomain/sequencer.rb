@@ -24,6 +24,12 @@ module RubyPlc
         end
       end
 
+      def Sequencer.wait(delay, tag, &block)
+        wait_until(now + delay, tag) do
+          yield
+        end
+      end
+
       def Sequencer.cancel(tag)
         @@wait_tree.synchronize do
           @@wait_tree.delete_if {|k,v| k.tag == tag }
@@ -32,7 +38,7 @@ module RubyPlc
       end
 
       def Sequencer.at_once(&block)
-        wait_until(ZeroTime, :now, block)
+        wait_until(now, :now, block)
       end
 
       def Sequencer.run

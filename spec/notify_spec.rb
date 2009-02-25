@@ -10,16 +10,25 @@ class NotifyTestOne
   notify :one
 end
 
+class NotifyTestOneWithHandler
+  extend Notify
+  notify :one
+
+  def handle_notify_error(ex)
+    throw RuntimeError.new('Notified')
+  end
+end
+
 class NotifyTestOneTwo
   extend Notify
   notify :one
   notify :two
 end
 
-#class NotifyTestTwo
-#  extend Notify
-#  notify :one, :two
-#end
+class NotifyTestTwo
+  extend Notify
+  notify :one, :two
+end
 
 
 
@@ -27,8 +36,9 @@ describe Notify do
   before(:each) do
     @empty = NotifyTestEmpty.new
     @one = NotifyTestOne.new
+    @one_handler = NotifyTestOneWithHandler.new
     @one_two = NotifyTestOneTwo.new
-    # @two = NotifyTestTwo.new
+    @two = NotifyTestTwo.new
   end
 
   it "should support the on_one method for adding listeners" do
@@ -58,29 +68,37 @@ describe Notify do
 
   it "should support more than one listener" do
     @count = 0
-    1.up_to 5 do
-      @one.on_one { @count += 1 }
+    [1, 2, 5, 6].each do |x|
+      @one.on_one { @count += x }
     end
     @one.notify_one
-    @count.should equal(5)
+    @count.should equal(14)
   end
 
   it "should not misbehave if an exception is thrown by a listener" do
-    test = nil
-    @one.on_one { throw 'Boom!' }
+    @test = nil
+    @one.on_one { throw RuntimeError.new('Boom!') }
     @one.on_one { @test = true }
-    lambda { @one.notify_one }.should_not raise_error
-    test.should be_true
+    lambda { @one.notify_one }.should_not raise_error(RuntimeError, /Boom/)
+    @test.should be_true
   end
 
-  it "should call handle_notify_exception if available" do
-    test = nil
-    @one.class_eval <<-EOF
-      def handle_notify_exception(ex) do
-        throw 'you heard me!'
-      end
-    EOF
-    @one.on_one { throw 'BOOM' }
-    lambda { @on_one.notify_one }.should raise_exception
+  it "should call handle_notify_error if available" do
+    @one_handler.on_one { throw 'BOOM' }
+    lambda { @one_handler.notify_one }.should raise_error(Exception, /Notified/)
   end
+
+  it 'should allow two or more notify declarations on one line' do
+    @two.on_one { puts 'test' }
+    @two.on_two { puts 'test' }
+  end
+
+  it 'should pass arguments to notification messages' do
+    @one.on_one do |a, b|
+      a.should be_true
+      b.should be_true
+    end
+    @one.notify_one true, true
+  end
+
 end
