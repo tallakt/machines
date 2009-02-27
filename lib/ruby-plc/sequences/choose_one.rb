@@ -24,35 +24,16 @@ module RubyPlc
         yield s if block_given?
       end
 
-      def otherwise(step) 
-        s = to_step(step) || Sequence.new
-        @idle_step.otherwise_to s
-        s.default_next_step = @end_step
-        @steps << s
-        yield s if block_given?
-      end
-
       def active?
         @steps.inject(false) {|act, s| act || s.active? }
       end
 
       def perform_start
-        @idle_step.start
+        @idle_step.start!
       end
 
       def perform_reset
-        @steps.each {|br| br.last.reset }
-      end
-
-
-      private
-
-      def to_step(step)
-        if step.respond_to? :to_step
-          step.to_step
-        else
-          step
-        end
+        @steps.each {|s| s.reset! }
       end
     end
   end

@@ -36,7 +36,7 @@ module RubyPlc
         not active? # active? method should be present in including class
       end
       
-      def start
+      def start!
         if may_start? # may_start? defined in including class
           @start_time = Sequencer.now
           perform_start  # startup must be defined in including class
@@ -78,27 +78,43 @@ module RubyPlc
         @otherwise_step = step
       end
 
+      def continue_from(step)
+        step.contine_to self
+      end
+
+      def otherwise_from(step)
+        step.otherwise_to self
+      end
+
+      def continue_from_if(condition, step)
+        step.continue_if condition, self
+      end
+
       def duration
         @start_time && (Sequencer.now - @start_time)
       end
 
-      def reset
+      def reset!
         perform_reset # defined in class 
         notify_reset
       end
 
+      # Framework method
       def perform_start
         @active = true
       end
 
+      # Framework method
       def may_continue?
         true
       end
 
+      # Framework method
       def perform_finish
         @active = false
       end
       
+      # Framework method
       def may_start?
         finished?
       end

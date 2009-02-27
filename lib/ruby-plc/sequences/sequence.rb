@@ -10,29 +10,37 @@ mmodule RubyPlc
 
       attr_reader :name
 
-      def initialize(name = nil, options = {})
+      def initialize(name = nil, @options = {})
         @name = name
         @steps = []
-        @options = options
-        yield self if block_given?      
-        if @options[:auto_start]
-          Sequencer::at_once { start }
+        @reverse_dir = false
+        @end_step = Step.new do |s|
+          s.at_end { continue! }
         end
-        if @options[:cyclic]
-          on_exit do 
-            Sequencer::at_once { start }
-          end
-        end
+  
+        circular if @options[:circular]
+        auto_start if @options[:auto_start]
 
+        yield self if block_given?
       end
 
       def step(s)
-        if s.respond_to? :to_step
-          add_step s.to_step
+        ns = to_step s
+
+        if @options[:reverse]
+          ns.default_next_step = @steps.first
         else
-          add_step s
+          @steps.last && @steps.last.default_next_step = ns
+          ns.default_next_step = end_step
         end
-        s
+
+        yield s if block_given?
+
+        if @options[:reverse]
+          @steps.unshift ns
+        else
+          @steps << ns
+        end
       end
 
       def wait(time)
@@ -40,7 +48,11 @@ mmodule RubyPlc
       end
 
       def circular(delay = 100)
-        on_exit { Sequencer::wait(delay, self) { start } }
+        on_exit { Sequencer::wait(delay, self) { start! } }
+      end
+
+      def auto_start
+        Sequencer::at_once { start! }
       end
 
       def active?
@@ -52,7 +64,7 @@ mmodule RubyPlc
       end
 
       def perform_start
-        @steps.first && @steps.first.start
+        (@steps.first || @end_step).start!
       end
 
       def current_step
@@ -60,20 +72,8 @@ mmodule RubyPlc
       end
 
       def perform_reset
-        @steps.each {|s| s.reset }
-      end
-
-      private
-
-      def add_step(s)
-        if @options[:reverse]
-          s.default_next_step = @steps.first
-          @steps.unshift s
-        else
-          @steps.last.default_next_step = s
-          @steps << s
-        end
-        s.on_exit { continue! if s == @steps.last }
+        @steps.each {|s| s.reset! }
+        @end_step.reset!
       end
     end
   end

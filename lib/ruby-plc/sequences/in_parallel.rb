@@ -9,17 +9,15 @@ module RubyPlc
       def initialize(name = nil)
         @name = name
         @steps = []
+        @end_step = Step.new
+        @steps << @end_step
         yield self if block_given?      
       end
 
       def step(s)
-        if s.respond_to? :to_step
-           @steps << s.to_step
-        else
-           @steps << s
-        end
-        @steps.last.on_exit do
-          continue! if finished?
+        steps << to_step s
+        @steps.last.on_exit { continue! }
+          continue!
         end
       end
 
@@ -27,12 +25,16 @@ module RubyPlc
         @steps.inject(false) {|act, step| act || step.active? }
       end
 
+      def may_continue?
+        finished?
+      end
+
       def perform_start
-        @steps.each {|s| s.start }
+        @steps.each {|s| s.start! }
       end
 
       def perform_reset
-        @steps.each {|s| s.reset }
+        @steps.each {|s| s.reset! }
       end
     end
   end

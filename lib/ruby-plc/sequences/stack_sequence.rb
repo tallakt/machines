@@ -26,11 +26,17 @@ module RubyPlc
       end
 
       def up_step(s)
-        @up.step s
+        ns = to_step(s) || Step.new
+        @up.step ns do
+          yield ns if block_given?
+        end
       end
 
       def down_step(s)
-        @down.step s
+        ns = s || Step.new
+        @down.step ns do
+          yield ns if block_given?
+        end
       end
 
       def up_wait(time)
@@ -46,12 +52,12 @@ module RubyPlc
       end
 
       def perform_start
-        @up.start
+        @up.start!
       end
 
       def perform_reset
-        @up.reset
-        @down.reset
+        @up.reset!
+        @down.reset!
       end
     end
   end
