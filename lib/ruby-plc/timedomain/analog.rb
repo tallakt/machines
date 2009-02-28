@@ -1,18 +1,7 @@
-include 'ruby-plc/timedomain/timer'
-include 'ruby-plc/etc/notify'
-
 module RubyPlc
   module Physical
-    module Analog
-      extend Notify
-
-      attr_accessor :name, :description
-      notify :change
-
-      def initialize(value = nil)
-        @name, @description = nil
-        @v = value
-
+    class Analog
+      def initialize
         %w(+ - * \ ** % <=>).each do |op|
           module_eval <<-EOF
             def #{op}(other)
@@ -32,18 +21,6 @@ module RubyPlc
             end
            EOF
         end
-      end
-
-      def v=(val)
-        if @v != val
-          @v = val
-          notify_change
-        end
-        @v
-      end
-
-      def v
-        @v
       end
 
       def Analog.combine(*signals, &block)
@@ -68,6 +45,17 @@ module RubyPlc
           end
         end
         result
+      end
+
+      def Analog.to_analog(v)
+        case v
+        when Analog
+          v
+        when nil
+          v
+        else
+          AnalogConstant.new v
+        end
       end
 
       private
