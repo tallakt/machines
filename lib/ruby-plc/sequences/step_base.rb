@@ -36,7 +36,7 @@ module RubyPlc
         not active? # active? method should be present in including class
       end
       
-      def start!
+      def start
         if may_start? # may_start? defined in including class
           @start_time = Sequencer.now
           perform_start  # startup must be defined in including class
@@ -52,20 +52,19 @@ module RubyPlc
               step = otherwise_step
             end
           else
-            step = otherwise_step || default_next_step unless @exit_conditions
-
+            step = otherwise_step || default_next_step
           end
 
-          private_continue! step if step
+          private_continue step if step
         end
       end
 
-      def continue!
-        private_continue! otherwise_step || default_next_step
+      def continue
+        private_continue otherwise_step || default_next_step
       end
 
       def continue_if(condition, step = nil)
-        condition.on_re { private_continue! step } if condition.respond_to? :on_re
+        condition.on_re { private_continue step } if condition.respond_to? :on_re
         @exit_conditions ||= []
         @exit_conditions << [condition, step]
       end
@@ -94,7 +93,7 @@ module RubyPlc
         @start_time && (Sequencer.now - @start_time)
       end
 
-      def reset!
+      def reset
         perform_reset # defined in class 
         notify_reset
       end
@@ -121,11 +120,14 @@ module RubyPlc
 
       private 
 
-      def private_continue!(step)
+      def private_continue(step)
         if may_continue? 
-          perform_finish
-          @prev_duration = duration
-          Sequencer::at_once { step.start }
+          Sequencer::at_once do 
+            @prev_duration = duration
+            notify_exit
+            perform_finish
+            step.start 
+          end
         end
       end
 

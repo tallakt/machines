@@ -1,5 +1,5 @@
-include 'ruby-plc/timedomain/sequencer'
-include 'ruby-plc/etc/notify'
+require 'ruby-plc/timedomain/scheduler'
+require 'ruby-plc/etc/notify'
 
 module RubyPlc
   module TimeDomain
@@ -19,7 +19,7 @@ module RubyPlc
         # todo support analog signals
         @time = t
         if @start_time
-          Sequencer::cancel self
+          Scheduler.current.cancel self
           do_wait
         end
       end
@@ -30,20 +30,20 @@ module RubyPlc
 
       def elapsed
         if @start_time
-          Sequencer::now - start
+          Scheduler.current.now - @start_time
         else
           nil
         end
       end
 
       def start
-        @start_time = Sequencer::now
+        @start_time = Scheduler.current.now
         do_wait
       end
 
       def reset
         @start_time = nil
-        Sequencer
+        Scheduler.current.cancel self
       end
 
       def active?
@@ -57,9 +57,9 @@ module RubyPlc
       private 
 
       def do_wait
-        Sequencer::wait_until @start_time + @time, self do
+        Scheduler.current.wait_until @start_time + @time, self do
           @start_time = nil
-          notify_finished
+          notify_finish
         end
       end
     end
