@@ -145,6 +145,7 @@ describe 'Discrete signals' do
     @double_pulse.ton(1).should be_a DiscreteBase
     @double_pulse.ton(0.5).on_change { times << now }
     @double_pulse.ton(2).on_change { fail }
+
     Scheduler.current.run_for 10
     check_time_offsets(times, [1.5, 2, 4.5, 5]);
   end
