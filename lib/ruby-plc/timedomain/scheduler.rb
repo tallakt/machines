@@ -9,6 +9,7 @@ module RubyPlc
       end
 
       ZeroTime = Time.at(0)
+      @@current = nil
 
       def initialize
         @scheduled = RBTree.new

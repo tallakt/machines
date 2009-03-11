@@ -7,6 +7,7 @@ module RubyPlc
       extend Notify
 
       notify :finish
+      alias :at_end :on_finish
 
       def initialize(time)
         @time = time

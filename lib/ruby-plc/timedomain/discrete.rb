@@ -1,8 +1,8 @@
-include 'ruby-plc/timedomain/discrete_signal'
+require 'ruby-plc/timedomain/discrete_base'
 
 module RubyPlc
-  module Signals
-    class ValSignal < DiscreteSignal
+  module TimeDomain
+    class Discrete < DiscreteBase
       def initialize
         super 
         @v = false
@@ -24,9 +24,14 @@ module RubyPlc
         end
       end
 
-      def sink(signal)
-        signal.on_change { v = signal.v }
+      private
+
+      def data_change(value)
+        notify_re if value
+        notify_fe unless value
+        notify_change
       end
+
     end
   end
 end

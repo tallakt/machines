@@ -101,4 +101,16 @@ describe Notify do
     @one.notify_one true, true
   end
 
+  it 'should only call a callback once even if registered more times' do
+    counter = 0
+    p = Proc.new { counter += 1 }
+    (1..10).each do 
+      # TODO: This doesnt work - will it work on ruby 1.9?
+      # @one.on_one { counter += 1 }
+      @one.on_one(&p)
+    end
+    @one.notify_one
+    counter.should be(1)
+  end
+
 end
