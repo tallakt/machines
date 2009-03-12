@@ -3,9 +3,8 @@ require 'ruby-plc/timedomain/discrete_base'
 module RubyPlc
   module TimeDomain
     class Discrete < DiscreteBase
-      def initialize
-        super 
-        @v = false
+      def initialize(vv = false)
+        @v = vv
         yield self if block_given?
       end
 
