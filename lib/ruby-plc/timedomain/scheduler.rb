@@ -12,7 +12,7 @@ module RubyPlc
       @@current = nil
 
       def initialize
-        @scheduled = RBTree.new
+        @scheduled = MultiRBTree.new
         @scheduled.extend(MonitorMixin)
         @wait_cond = @scheduled.new_cond
         @running = false

@@ -26,9 +26,9 @@ module RubyPlc
           result = Discrete.new
           on_fe do
             timer.reset
-            result.value = false
+            result.v = false
           end
-          timer.at_end { result.value = true }
+          timer.at_end { result.v = true }
           result
         end
       end

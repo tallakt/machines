@@ -75,13 +75,11 @@ describe Scheduler do
 
   it 'should schedule tasks correctly that were scheduled during runtime' do
     arr = []
-    (1..10).each do |i|
-      Scheduler.current.wait 2 do
-        perform_foo arr, :foo
-      end
-      Scheduler.current.wait 1 do
-        perform_foo arr, :bar
-      end
+    Scheduler.current.wait 2 do
+      perform_foo arr, :foo
+    end
+    Scheduler.current.wait 1 do
+      perform_foo arr, :bar
     end
     Scheduler.current.run_for 6.5
     arr.should eql([:bar, :foo] * 3)
@@ -96,6 +94,20 @@ describe Scheduler do
 
   it 'should return a Time object from the now function' do
     Scheduler.current.now.should be_a(Time)
+  end
+
+  it 'should respond to many different events at the same time' do
+    t = Scheduler.current.now + 0.5
+    count = 0
+    (1..100).each do
+      Scheduler.current.wait_until(t) { count += 1 } 
+    end
+    Scheduler.current.wait_until t do
+      count += 2
+      count -= 1
+    end
+    Scheduler.current.run_for 1
+    count.should == 101
   end
 end
 

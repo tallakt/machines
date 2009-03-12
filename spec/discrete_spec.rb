@@ -4,6 +4,7 @@ require 'ruby-plc/timedomain/discrete_sink'
 
 include RubyPlc::TimeDomain
 
+
 describe 'Discrete signals' do
   before(:each) do
     @a = Discrete.new
@@ -136,17 +137,11 @@ describe 'Discrete signals' do
   end
 
   it 'should support timed on returning a signal' do
-    # This is what I know this far: When ever the ton
-    # method is called on the double_pulse signal, two
-    # of the change callbacks disappear from the original
-    # signal
     times = []
-    @double_pulse.on_change { puts 'change: ' + now.to_s }
     @double_pulse.ton(1).should be_a DiscreteBase
     @double_pulse.ton(0.5).on_change { times << now }
     @double_pulse.ton(2).on_change { fail }
-
-    Scheduler.current.run_for 10
+    Scheduler.current.run_for 20000
     check_time_offsets(times, [1.5, 2, 4.5, 5]);
   end
 

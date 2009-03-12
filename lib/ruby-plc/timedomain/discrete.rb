@@ -17,10 +17,10 @@ module RubyPlc
         old_v = @v
         if new_val
           @v = true
-          data_change v unless old_v
+          data_change @v unless old_v
         else
           @v = false
-          data_change v if old_v
+          data_change @v if old_v
         end
       end
 
@@ -31,7 +31,6 @@ module RubyPlc
         notify_fe unless value
         notify_change
       end
-
     end
   end
 end
