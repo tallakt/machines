@@ -1,8 +1,9 @@
 require 'ruby-plc/etc/notify.rb'
+require 'ruby-plc/timedomain/discrete'
 
 module RubyPlc
   module Sequences
-    module StepBase
+    class StepBase
       extend Notify
 
       notify :enter, :exit, :reset
@@ -16,17 +17,17 @@ module RubyPlc
 
       # Active signal - dont add listeners unless necessary
       def active_signal
-        @active_signal ||= ValSignal.new
+        @active_signal ||= Discrete.new
       end
 
-      alias :original_notify_enter, :notify_enter
+      alias :original_notify_enter :notify_enter
       def notify_enter
         original_notify_enter
         @active_signal.v = true if @active_signal
       end
 
 
-      alias :original_notify_exit, :notify_exit
+      alias :original_notify_exit :notify_exit
       def notify_exit
         original_notify_exit
         @active_signal.v = false if @active_signal
@@ -38,7 +39,8 @@ module RubyPlc
       
       def start
         if may_start? # may_start? defined in including class
-          @start_time = Sequencer.now
+          @start_time = Scheduler.current.now
+          @active_signal.v = true if @active_signal
           perform_start  # startup must be defined in including class
           notify_enter
 
@@ -52,7 +54,7 @@ module RubyPlc
               step = otherwise_step
             end
           else
-            step = otherwise_step || default_next_step
+            step = !@continue_on_callback && (otherwise_step || default_next_step)
           end
 
           private_continue step if step
@@ -70,7 +72,7 @@ module RubyPlc
       end
 
       def continue_to(step)
-        @next_step = step
+        continue_if true, step
       end
 
       def otherwise_to(step)
@@ -89,8 +91,12 @@ module RubyPlc
         step.continue_if condition, self
       end
 
+      def continue_on_callback
+        @continue_on_callback = true
+      end
+
       def duration
-        @start_time && (Sequencer.now - @start_time)
+        @start_time && (Scheduler.current.now - @start_time)
       end
 
       def reset
@@ -122,11 +128,12 @@ module RubyPlc
 
       def private_continue(step)
         if may_continue? 
-          Sequencer::at_once do 
+          Scheduler.current.at_once do 
             @prev_duration = duration
             notify_exit
             perform_finish
             step.start 
+            @active_signal.v = false if @active_signal
           end
         end
       end
@@ -135,7 +142,7 @@ module RubyPlc
         case cond
         when Proc
           cond.call
-        when DiscreteSignal
+        when DiscreteBase
           cond.v
         else
           cond
