@@ -83,6 +83,14 @@ describe Notify do
     @test.should be_true
   end
 
+  it "should not misbehave if an exception is thrown by a listener, even errors" do
+    @test = nil
+    @one.on_one { @test.call_undefined_method }
+    @one.on_one { @test = true }
+    lambda { @one.notify_one }.should_not raise_error(RuntimeError, /Boom/)
+    @test.should be_true
+  end
+
   it "should call handle_notify_error if available" do
     @one_handler.on_one { throw 'BOOM' }
     lambda { @one_handler.notify_one }.should raise_error(Exception, /Notified/)
@@ -99,6 +107,18 @@ describe Notify do
       b.should be_true
     end
     @one.notify_one true, true
+  end
+
+  it 'should only call a callback once even if registered more times' do
+    counter = 0
+    p = Proc.new { counter += 1 }
+    (1..10).each do 
+      # TODO: This doesnt work - will it work on ruby 1.9?
+      # @one.on_one { counter += 1 }
+      @one.on_one(&p)
+    end
+    @one.notify_one
+    counter.should be(1)
   end
 
 end

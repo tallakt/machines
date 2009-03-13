@@ -1,11 +1,8 @@
-include 'ruby-plc/sequences/step_base'
-include 'ruby-plc/timedomain/sequencer'
+require 'ruby-plc/sequences/step_base'
 
 module RubyPlc
   module Sequences
-    class Step
-      include StepBase
-
+    class Step < StepBase
       attr_reader :name
 
       def initialize(name = nil)

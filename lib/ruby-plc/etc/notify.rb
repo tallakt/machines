@@ -26,7 +26,8 @@ module Notify
         
         def on_#{n}(&proc)
           #{listeners} ||= []
-          #{listeners} << proc
+          #{listeners} << proc unless #{listeners}.include? proc
+          self
         end
       EOS
     end
