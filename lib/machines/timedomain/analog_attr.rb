@@ -1,4 +1,4 @@
-require 'ruby-plc/timedomain/analog.rb'
+require 'machines/timedomain/analog.rb'
 
 class Object
   def analog_attr(name)

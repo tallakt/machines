@@ -1,6 +1,6 @@
-require 'ruby-plc/timedomain/discrete_base'
+require 'machines/timedomain/discrete_base'
 
-module RubyPlc
+module Machines
   module TimeDomain
     class Discrete < DiscreteBase
       def initialize(vv = false)

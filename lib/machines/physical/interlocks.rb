@@ -1,4 +1,4 @@
-module RubyPlc
+module Machines
   module Physical
     class Interlock
       def initialize

@@ -7,4 +7,4 @@ rescue LoadError
 end
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
-require 'ruby-plc'
+require 'machines'

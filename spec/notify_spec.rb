@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
-require 'ruby-plc/etc/notify.rb'
+require 'machines/etc/notify.rb'
 
 class NotifyTestEmpty
   extend Notify

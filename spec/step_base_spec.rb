@@ -1,9 +1,9 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
-require 'ruby-plc/sequences/step_base'
-require 'ruby-plc/sequences/step'
+require 'machines/sequences/step_base'
+require 'machines/sequences/step'
 
-include RubyPlc::Sequences
-include RubyPlc::TimeDomain
+include Machines::Sequences
+include Machines::TimeDomain
 
 describe StepBase do
   before(:each) do

@@ -1,4 +1,4 @@
-module RubyPlc
+module Machines
   module Sequences
     class WaitStep < Step
       attr_accessor :timeout

@@ -1,7 +1,7 @@
 include 'ruby_plc/sequences/step_base'
-include 'ruby-plc/sequences/sequence'
+include 'machines/sequences/sequence'
 
-module RubyPlc
+module Machines
   module Sequences
     class StackSequence
       include StepBase

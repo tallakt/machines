@@ -1,6 +1,6 @@
-require 'ruby-plc/sequences/step_base'
+require 'machines/sequences/step_base'
 
-module RubyPlc
+module Machines
   module Sequences
     class Step < StepBase
       attr_reader :name

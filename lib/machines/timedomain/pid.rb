@@ -1,7 +1,7 @@
-require 'ruby-plc/timedomain/sampler.rb'
-require 'ruby-plc/timedomain/analog_attr.rb'
+require 'machines/timedomain/sampler.rb'
+require 'machines/timedomain/analog_attr.rb'
 
-module RubyPlc
+module Machines
   module Physical
     class PID
       analog_attr :p, :i, :d, :sample_time, :out_max, :out_min, :setpoint, :input

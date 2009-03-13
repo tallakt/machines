@@ -1,9 +1,9 @@
-require 'ruby-plc/timedomain/timer'
-require 'ruby-plc/timedomain/binary_op_discrete'
-require 'ruby-plc/timedomain/negated_discrete'
-require 'ruby-plc/etc/notify'
+require 'machines/timedomain/timer'
+require 'machines/timedomain/binary_op_discrete'
+require 'machines/timedomain/negated_discrete'
+require 'machines/etc/notify'
 
-module RubyPlc
+module Machines
   module TimeDomain
     class DiscreteBase
       extend Notify

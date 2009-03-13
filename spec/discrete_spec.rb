@@ -1,8 +1,8 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
-require 'ruby-plc/timedomain/discrete'
-require 'ruby-plc/timedomain/discrete_sink'
+require 'machines/timedomain/discrete'
+require 'machines/timedomain/discrete_sink'
 
-include RubyPlc::TimeDomain
+include Machines::TimeDomain
 
 
 describe 'Discrete signals' do

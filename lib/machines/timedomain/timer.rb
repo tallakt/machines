@@ -1,7 +1,7 @@
-require 'ruby-plc/timedomain/scheduler'
-require 'ruby-plc/etc/notify'
+require 'machines/timedomain/scheduler'
+require 'machines/etc/notify'
 
-module RubyPlc
+module Machines
   module TimeDomain
     class Timer
       extend Notify

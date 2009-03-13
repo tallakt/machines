@@ -1,7 +1,7 @@
 require 'rbtree'
 require 'monitor'
 
-module RubyPlc
+module Machines
   module TimeDomain
     class Scheduler
       class Entry

@@ -1,6 +1,6 @@
-require 'ruby-plc/timedomain/discrete_base'
+require 'machines/timedomain/discrete_base'
 
-module RubyPlc
+module Machines
   module TimeDomain
     class DiscreteSink < DiscreteBase
       attr_reader :source

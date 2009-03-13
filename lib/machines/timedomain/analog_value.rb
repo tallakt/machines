@@ -1,8 +1,8 @@
-include 'ruby-plc/timedomain/analog'
-include 'ruby-plc/timedomain/timer'
-include 'ruby-plc/etc/notify'
+include 'machines/timedomain/analog'
+include 'machines/timedomain/timer'
+include 'machines/etc/notify'
 
-module RubyPlc
+module Machines
   module Physical
     module AnalogValue < Analog
       extend Notify

@@ -1,40 +1,30 @@
-module RubyPlc
+module Machines
   module Physical
-    class Motor
+    class Valve
       attr_reader :name, :description, :interlocks
-      attr_accessor :start_out, :contactor
 
-      def initialize(name = nil, description = nil)
-        @name, @description = name, description
+      def initialize(name = nil, description = nil, options = {})
+        @name, @description, @options = name, description, options
         @interlocks = Interlocks.new
         @manual = false
-        @startup_timer = Timer.new 500
         yield self if block_given?
       end
 
-      def startup_time
-        @startup_timer.time
-      end
-
-      def startup_time=(t)
-        @startup_timer.time = t
-      end
-
-      def start(mode = :auto)
+      def open(mode = :auto)
         update_manual mode
         # TODO
       end
 
-      def stop(mode = :auto)
+      def close(mode = :auto)
         update_manual mode
         # TODO
       end
 
-      def running?
+      def open?
         # TODO
       end
 
-      def stopped?
+      def closed?
         # TODO
       end
 
@@ -46,28 +36,32 @@ module RubyPlc
         manual
       end
 
+      def normally_open
+        @options[:normally_open] = true
+      end
       # for use in a Stacksequence
       def up_step
-        start_step
+        open_step
       end
 
       # for use in a Stacksequence
       def down_step
-        stop_step
+        close_step
       end
 
-      def start_step
+      def open_step
         Step.new do |s|
-          s.on_enter { start }
-          s.continue_when { running? }
-          s.on_reset { stop }
+          s.on_enter { open }
+          s.continue_when { open? }
+          s.on_reset { close unless @options[:normally_open] }
         end
       end
 
-      def stop_step
+      def close_step
         Step.new do |s|
-          s.on_enter { stop }
-          s.continue_when { stopped? }
+          s.on_enter { close }
+          s.continue_when { closed? }
+          s.on_reset { open if @options[:normally_open] }
         end
       end
 
@@ -84,6 +78,7 @@ module RubyPlc
     end
   end
 end
+
 
 
 

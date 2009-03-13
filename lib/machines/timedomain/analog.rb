@@ -1,7 +1,7 @@
-require 'ruby-plc/timedomain/timer'
-require 'ruby-plc/etc/notify'
+require 'machines/timedomain/timer'
+require 'machines/etc/notify'
 
-module RubyPlc
+module Machines
   module TimeDomain
     class Analog
       extend Notify

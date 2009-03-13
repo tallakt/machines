@@ -1,30 +1,40 @@
-module RubyPlc
+module Machines
   module Physical
-    class Valve
+    class Motor
       attr_reader :name, :description, :interlocks
+      attr_accessor :start_out, :contactor
 
-      def initialize(name = nil, description = nil, options = {})
-        @name, @description, @options = name, description, options
+      def initialize(name = nil, description = nil)
+        @name, @description = name, description
         @interlocks = Interlocks.new
         @manual = false
+        @startup_timer = Timer.new 500
         yield self if block_given?
       end
 
-      def open(mode = :auto)
+      def startup_time
+        @startup_timer.time
+      end
+
+      def startup_time=(t)
+        @startup_timer.time = t
+      end
+
+      def start(mode = :auto)
         update_manual mode
         # TODO
       end
 
-      def close(mode = :auto)
+      def stop(mode = :auto)
         update_manual mode
         # TODO
       end
 
-      def open?
+      def running?
         # TODO
       end
 
-      def closed?
+      def stopped?
         # TODO
       end
 
@@ -36,32 +46,28 @@ module RubyPlc
         manual
       end
 
-      def normally_open
-        @options[:normally_open] = true
-      end
       # for use in a Stacksequence
       def up_step
-        open_step
+        start_step
       end
 
       # for use in a Stacksequence
       def down_step
-        close_step
+        stop_step
       end
 
-      def open_step
+      def start_step
         Step.new do |s|
-          s.on_enter { open }
-          s.continue_when { open? }
-          s.on_reset { close unless @options[:normally_open] }
+          s.on_enter { start }
+          s.continue_when { running? }
+          s.on_reset { stop }
         end
       end
 
-      def close_step
+      def stop_step
         Step.new do |s|
-          s.on_enter { close }
-          s.continue_when { closed? }
-          s.on_reset { open if @options[:normally_open] }
+          s.on_enter { stop }
+          s.continue_when { stopped? }
         end
       end
 
@@ -78,7 +84,6 @@ module RubyPlc
     end
   end
 end
-
 
 
 

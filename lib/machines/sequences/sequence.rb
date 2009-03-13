@@ -1,9 +1,9 @@
-include 'ruby-plc/sequences/step_base'
-include 'ruby-plc/timedomain/wait_step'
-include 'ruby-plc/timedomain/timer'
-include 'ruby-plc/timedomain/sequencer'
+include 'machines/sequences/step_base'
+include 'machines/timedomain/wait_step'
+include 'machines/timedomain/timer'
+include 'machines/timedomain/sequencer'
 
-mmodule RubyPlc
+mmodule Machines
   module Sequences
     class Sequence
       include StepBase

@@ -1,6 +1,6 @@
-include 'ruby-plc/timedomain/analog'
+include 'machines/timedomain/analog'
 
-module RubyPlc
+module Machines
   module Physical
     class AnalogConstant < Analog
       attr_reader :v

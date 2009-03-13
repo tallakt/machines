@@ -1,6 +1,6 @@
 include 'ruby_plc/sequences/step_base'
 
-module RubyPlc
+module Machines
   module Sequences
     class InParallel
       include StepBase

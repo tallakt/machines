@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
-require 'ruby-plc/timedomain/analog'
+require 'machines/timedomain/analog'
 
-include RubyPlc::TimeDomain
+include Machines::TimeDomain
 
 
 describe 'Analog signals' do

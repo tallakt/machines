@@ -1,7 +1,7 @@
-require 'ruby-plc/etc/notify.rb'
-require 'ruby-plc/timedomain/discrete'
+require 'machines/etc/notify.rb'
+require 'machines/timedomain/discrete'
 
-module RubyPlc
+module Machines
   module Sequences
     class StepBase
       extend Notify

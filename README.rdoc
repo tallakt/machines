@@ -1,14 +1,38 @@
-= ruby-plc
+= machines
 
-* FIX (url)
+* http://github.com/tallakt/machines
 
 == DESCRIPTION:
 
-FIX (describe your package)
+A library for creating machine controllers (typically controlled by a PLC)
+in Ruby.
+
+The aim is not to replicate the ways you would work with a PLC, but to 
+provide tools to implement these tasks using Ruby in a Ruby way.
+
+The Plan is to support the following aspects
+
+* Continuous signals discrete and analog with callback updates
+* Common timers
+* Possibility to run tests i accelelrated time
+* Machine state persistence in ActiveRecord - update code while running or have hot standbys
+* Rails like scripts to create machine skeletons and install them on their servers
+* State machines
+* Modbus communication with PLCs and remote IO stations, modbus server options
+
+Future functionality
+
+* OPC UA SOAP and binary conenctivity
 
 == FEATURES/PROBLEMS:
 
-* FIX (list of features or problems)
+This is still a proof of concept stage library. Although I make an effort to
+test code automatically as I go along, there are currently no systems in use
+based on this library.
+
+Much functionality is still missing. The library structure will change 
+frequently in future releases. Code is not commented - this will be 
+performed if this turns out to be a viable concept.
 
 == SYNOPSIS:
 
@@ -16,7 +40,9 @@ FIX (describe your package)
 
 == REQUIREMENTS:
 
-* FIX (list of requirements)
+* rbtree
+
+...probably some more
 
 == INSTALL:
 

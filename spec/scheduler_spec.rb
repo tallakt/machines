@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
-require 'ruby-plc/timedomain/scheduler.rb'
+require 'machines/timedomain/scheduler.rb'
 require 'benchmark'
 require 'timeout'
 
