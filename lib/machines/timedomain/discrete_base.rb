@@ -4,7 +4,7 @@ require 'machines/timedomain/negated_discrete'
 require 'machines/etc/notify'
 
 module Machines
-  module TimeDomain
+  module Timedomain
     class DiscreteBase
       extend Notify
 

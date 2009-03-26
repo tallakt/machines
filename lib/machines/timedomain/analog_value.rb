@@ -1,16 +1,10 @@
-include 'machines/timedomain/analog'
-include 'machines/timedomain/timer'
-include 'machines/etc/notify'
+require 'machines/timedomain/analog'
+require 'machines/timedomain/timer'
+require 'machines/etc/notify'
 
 module Machines
-  module Physical
-    module AnalogValue < Analog
-      extend Notify
-      include Analog
-
-      attr_accessor :name, :description
-      notify :change
-
+  module Timedomain
+    class AnalogValue < Analog
       def initialize(value = nil)
         @name, @description = nil
         @v = value

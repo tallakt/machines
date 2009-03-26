@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 require 'machines/timedomain/discrete'
 require 'machines/timedomain/discrete_sink'
 
-include Machines::TimeDomain
+include Machines::Timedomain
 
 
 describe 'Discrete signals' do

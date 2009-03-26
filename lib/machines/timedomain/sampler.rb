@@ -2,7 +2,7 @@ include 'machines/etc/notify'
 include 'machines/timedomain/sequencer'
 
 module Machines
-  module TimeDomain
+  module Timedomain
 
     # The Sample class will notify all listeners to the #on_sample function 
     # at even intervals

@@ -2,7 +2,7 @@ require 'machines/timedomain/scheduler'
 require 'machines/etc/notify'
 
 module Machines
-  module TimeDomain
+  module Timedomain
     class Timer
       extend Notify
 

@@ -3,7 +3,7 @@ require 'machines/sequences/step_base'
 require 'machines/sequences/step'
 
 include Machines::Sequences
-include Machines::TimeDomain
+include Machines::Timedomain
 
 describe StepBase do
   before(:each) do

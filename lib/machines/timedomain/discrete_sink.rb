@@ -1,7 +1,7 @@
 require 'machines/timedomain/discrete_base'
 
 module Machines
-  module TimeDomain
+  module Timedomain
     class DiscreteSink < DiscreteBase
       attr_reader :source
 

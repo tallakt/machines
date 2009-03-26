@@ -1,8 +1,10 @@
 require 'machines/timedomain/timer'
 require 'machines/etc/notify'
+require 'machines/timedomain/discrete'
+
 
 module Machines
-  module TimeDomain
+  module Timedomain
     class Analog
       extend Notify
       attr_accessor :name, :description

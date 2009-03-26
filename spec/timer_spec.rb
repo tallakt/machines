@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
 require 'machines/timedomain/timer'
 
-include Machines::TimeDomain
+include Machines::Timedomain
 
 describe Timer do
   before(:each) do

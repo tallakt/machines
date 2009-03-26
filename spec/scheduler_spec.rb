@@ -3,6 +3,8 @@ require 'machines/timedomain/scheduler.rb'
 require 'benchmark'
 require 'timeout'
 
+include Machines::Timedomain
+
 describe Scheduler do
   before(:each) do
   end

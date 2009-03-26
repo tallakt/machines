@@ -1,13 +1,13 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
-require 'machines/timedomain/analog'
+require 'machines/timedomain/analog_value'
 
-include Machines::TimeDomain
+include Machines::Timedomain
 
 
 describe 'Analog signals' do
   before(:each) do
-    @a = Analog.new 0.0
-    @b = Analog.new 0.0
+    @a = AnalogValue.new 0.0
+    @b = AnalogValue.new 0.0
     @d = Discrete.new
   end
 

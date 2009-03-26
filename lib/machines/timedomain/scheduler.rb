@@ -2,7 +2,7 @@ require 'rbtree'
 require 'monitor'
 
 module Machines
-  module TimeDomain
+  module Timedomain
     class Scheduler
       class Entry
         attr_accessor :time, :tag, :callback
