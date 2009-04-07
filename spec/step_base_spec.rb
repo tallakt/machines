@@ -24,7 +24,7 @@ describe StepBase do
       @puls[i] = p
       at(i) { p.v = true }
     end
-    @p1, @p2, @p3, @p4 = @puls
+    @p1, @p2, @p3, @p4 = @puls.values_at(1, 2, 3, 4)
   end
 
   after(:each) do
@@ -73,8 +73,8 @@ describe StepBase do
     @s.on_enter { expect_now 1.0; count += 1 }
     @s.on_exit { expect_now 2.0; count += 1 }
     @s.on_exit_reset { expect_now 2.0; count += 1 }
-    count.should == 3
     run
+    count.should == 3
   end
 
   it 'should callback on enter, regardless of whether it continues to next step' do
@@ -84,8 +84,8 @@ describe StepBase do
     @s.on_enter { expect_now 1.0; count += 1 }
     @s.on_exit { expect_now 1.0; count += 1 }
     @s.on_exit_reset { expect_now 1.0; count += 1 }
-    count.should == 3
     run
+    count.should == 3
   end
 
   it 'should callback on exit, but not before active signal is off' do
@@ -115,9 +115,8 @@ describe StepBase do
   it 'should continue to next step on otherwise condition' do
     @s.continue_if @p2, @fail_a
     @s.continue_if false, @fail_b
-    @s.otherwise @dummy
+    @s.otherwise_to @dummy
     at(1.0){ @s.start }
-    at(1.5){ @s.should be_active }
     at(2.5){ @s.should be_finished }
     run
   end
@@ -125,7 +124,7 @@ describe StepBase do
   it 'should continue to next step in precense of otherwise condition' do
     @s.continue_if @p2.invert, @dummy
     @s.continue_if false, @fail_b
-    @s.otherwise @fail_a
+    @s.otherwise_to @fail_a
     at(1.0){ @s.start }
     at(1.5){ @dummy.should be_active }
     run
@@ -151,9 +150,9 @@ describe StepBase do
     @s.default_next_step = @dummy
     @s.continue_if false, @fail_a
     @s.continue_if @p1.invert, @fail_b
-    at(2.0){ s.start }
+    at(2.0){ @s.start }
     run
-    @s.should be_running
+    @s.should be_active
   end
 
   it 'should report the correct duration' do
@@ -180,7 +179,7 @@ describe StepBase do
     @s.continue_if @p1, @dummy
     at(2.0){ @s.start }
     at(2.1){ @s.should be_finished }
-    at(2.1){ @dummy.should be_running }
+    at(2.1){ @dummy.should be_active }
     run
   end
 
@@ -188,20 +187,20 @@ describe StepBase do
     @s.default_next_step = @dummy
     @s.continue_on_callback
     at(1.0){ @s.start }
-    at(1.5){ @s.should be_running }
+    at(1.5){ @s.should be_active }
     at(2.0){ @s.continue }
-    at(2.5){ @dummy.should be_running }
+    at(2.5){ @dummy.should be_active }
     at(2.5){ @s.should be_finished }
     run
   end
 
-  it 'should contine to default next step on continue_if without step parameter' do
-    @s.default_next_step = @dummy
+  it 'should continue to default next step on continue_if without step parameter' do
     @s.continue_if @p2
+    @s.default_next_step = @dummy
     at(1.0){ @s.start }
-    at(1.5){ @s.should be_running }
+    at(1.5){ @s.should be_active }
     at(1.5){ @dummy.should be_finished }
-    at(2.5){ @dummy.should be_running }
+    at(2.5){ @dummy.should be_active }
     at(2.5){ @s.should be_finished }
     run
   end

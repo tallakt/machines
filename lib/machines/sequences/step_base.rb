@@ -38,7 +38,7 @@ module Machines
       end
       
       def start
-        if may_start? # may_start? defined in including class
+        if may_start? # may_start? defined in subclass
           @start_time = Scheduler.current.now
           @active_signal.v = true if @active_signal
           perform_start  # startup must be defined in including class
@@ -66,7 +66,9 @@ module Machines
       end
 
       def continue_if(condition, step = nil)
-        condition.on_re { private_continue step } if condition.respond_to? :on_re
+        if condition.respond_to? :on_re
+          condition.on_re { private_continue step || default_next_step } 
+        end
         @exit_conditions ||= []
         @exit_conditions << [condition, step]
       end
@@ -80,7 +82,7 @@ module Machines
       end
 
       def continue_from(step)
-        step.contine_to self
+        step.continue_to self
       end
 
       def otherwise_from(step)
@@ -132,7 +134,7 @@ module Machines
             @prev_duration = duration
             notify_exit
             perform_finish
-            step.start 
+            step.start if step
             @active_signal.v = false if @active_signal
           end
         end

@@ -13,34 +13,27 @@ module Machines
       def initialize(value = nil)
         @name, @description = nil
         @v = value
+      end
 
-        %w(+ - * \ ** % <=>).each do |op|
-          Analog.module_eval <<-EOF
-            def #{op}(other)
-              Analog.combine(self, other) do |a, b|
-                a #{op} b
-              end
-            end
-          EOF
+      def v=(val)
+        if @v != val
+          @v = val
+          notify_change
         end
+        @v
+      end
 
-        %w(== < > >= <= ===).each do |op| # != not supported
-          Analog.module_eval <<-EOF
-            def #{op}(other)
-              Analog.combine_to_discrete(self, other) do |a, b|
-                a #{op} b
-              end
-            end
-           EOF
-        end
+      def v
+        @v
       end
 
       def Analog.combine(*signals, &block)
-        result = Analog.new combine_helper_call(*signals, &block)
+        calc_proc = signals_value_calc_proc(*signals, &block)
+        result = Analog.new calc_proc.call
         signals.each do |sig|
           if sig.respond_to? :on_change
             sig.on_change do
-              result.v = combine_helper_call *signals, &block
+              result.v = calc_proc.call
             end
           end
         end
@@ -48,11 +41,13 @@ module Machines
       end
 
       def Analog.combine_to_discrete(*signals, &block)
-        result = Discrete.new combine_helper_call(*signals, &block)
+        calc_proc = signals_value_calc_proc(*signals, &block)
+        result = Discrete.new calc_proc.call
+
         signals.each do |sig|
           if sig.respond_to? :on_change
             sig.on_change do
-              result.v = combine_helper_call *signals, &block
+              result.v = calc_proc.call
             end
           end
         end
@@ -66,7 +61,7 @@ module Machines
         when nil
           v
         else
-          AnalogConstant.new v
+          Analog.new v
         end
       end
 
@@ -86,13 +81,48 @@ module Machines
         end
       end
 
-      private
-
-      def Analog.combine_helper_call(*signals, &block)
-        # TODO could be made more efficient by introducing a singleton method 
-        block.call(signals.map {|s| if s.respond_to?(:v) then s.v else s end })
+      # add operators returing a new Analog
+      %w(+ - * \ ** % <=>).each do |op|
+        Analog.module_eval <<-EOF
+          def #{op}(other)
+            Analog.combine(self, other) do |a, b|
+              a #{op} b
+            end
+          end
+        EOF
       end
 
+      # add operators returning a new Discrete signal
+      %w(== < > >= <= ===).each do |op| # != not supported
+        Analog.module_eval <<-EOF
+          def #{op}(other)
+            Analog.combine_to_discrete(self, other) do |a, b|
+              a #{op} b
+            end
+          end
+         EOF
+      end
+
+      private
+
+      # create a proc that will cal the block with the given signals
+      # as inputs. The inputs are used either as values or as the 
+      # values of signals. Ie. if the signal supports the :v method
+      # or variable, signal.v is used, otherwise, signal itself is 
+      # used
+      def Analog.signals_value_calc_proc(*signals, &block)
+        value_signals = []
+        signals.each_with_index do |sig, ii|
+          sig_val = "signals[#{ii}]" 
+          if sig.respond_to? :v then 
+            sig_val += '.v'
+          end
+          value_signals << sig_val
+        end
+        eval <<-EOF
+          Proc.new { block.call(#{value_signals.join ','}) }  
+        EOF
+      end
     end
   end
 end
