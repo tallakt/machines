@@ -205,8 +205,30 @@ describe StepBase do
     run
   end
 
+  def one_state_should_be_active
+    @s.should be_active unless @dummy.active?
+    @dummy.should be_active unless @s.active?
+    (@s || @dummy).should be_true
+  end
+
   it 'should overlap the active signal of two consequitive states' do
-    fail
+    @s.continue_if @p2, @dummy
+    [@s, @dummy].each do |state|
+      state.on_enter { one_state_should_be_active }
+      state.on_exit { one_state_should_be_active }
+    end
+    @s.start
+    one_state_should_be_active
+    current = Scheduler.current
+    Scheduler.class_eval do
+      alias :work_if_busy_orig :work_if_busy
+    end
+
+    current.stub!(:work_if_busy).and_return do
+      Scheduler.current.send(:work_if_busy_orig)
+      one_state_should_be_active
+    end
+    run
   end
 end
 
