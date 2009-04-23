@@ -1,7 +1,6 @@
 require 'machines/etc/notify'
 require 'machines/timedomain/scheduler'
 require 'rmodbus'
-require 'struct'
 require 'monitor'
 
 module Machines
@@ -10,7 +9,9 @@ module Machines
     # Performing requests are done in private threads and when the results 
     # are ready, they are added to the queue of scheduled tasks in the 
     # Scheduler
-    class ModbusSlave
+    class ActAsModbusSlave
+      extend Notify
+
       ModbusEntry = Struct.new :signal, :format, :scangroup, :length
 
       notify :exception
@@ -34,17 +35,31 @@ module Machines
         # Create a queue of Procs that call modbus functions in background
         queue = []
         queue.extend MonitorMixin
-        @thread_tasks = {
+        @tasks = {
           :queue => queue,
           :cond => queue.new_cond
         }
+      end
 
+      def start
         # Start the background threads
-        1.upto(@opts[:threads]) do
+        @stopping = false
+        @threads = (1..@opts[:threads]).collect do
           Thread.start do
             communication_thread_start
           end
         end
+        self
+      end
+
+
+      def stop
+        @tasks[:queue].synchronize do
+          @stopping = true
+          @tasks[:cond].broadcast
+        end
+        @threads.each {|t| t.wakeup.join }
+        self
       end
 
       def input(address, options={})
@@ -72,7 +87,7 @@ module Machines
         #TODO Must support buffering of writes for bool and int values :only_change/:always
         #FIXME Bug since values must be read from the signals in main thread, FIXED, TEST!
         values_generator = Proc.new do |group| 
-          @bool_outputs.values_at(group).map {|v| v ? 1 : 0})
+          @bool_outputs.values_at(group).map {|v| v ? 1 : 0}
         end
         update_helper(@bool_outputs, filter, :consecutive_groups, values_generator) do |group, conn, values|
           conn.write_multiple_coils(group.first, values)
@@ -125,7 +140,7 @@ module Machines
         end
       end
 
-      def update_helper(entries, filter, group_method, val_generator = nil) do
+      def update_helper(entries, filter, group_method, val_generator = nil)
         send(group_method, filter_scangroup(entries, filter)).each do |group|
           values = val_generator && val_generator.call(group)
           perform_in_background do |connection|
@@ -179,9 +194,9 @@ module Machines
       end
 
       def perform_in_background(&task) 
-        @thread_tasks[:queue].synchronize do
-          @thread_tasks[:queue] << task
-          @thread_tasks[:cond].signal
+        @tasks[:queue].synchronize do
+          @tasks[:queue] << task
+          @tasks[:cond].signal
         end
       end
 
@@ -200,7 +215,7 @@ module Machines
       end
       
       def bool_output(source, address, options)
-        addr = number_from_address address]
+        addr = number_from_address address
         if @bool_outputs.key? addr 
           throw RuntimeError.new 'Output on bool address %d is already in use' % addr 
         end
@@ -209,7 +224,7 @@ module Machines
       end
 
       def word_output(source, address, options)
-        addr = number_from_address address]
+        addr = number_from_address address
         if @word.key? addr 
           throw RuntimeError.new 'Output on word address %d is already in use' % addr 
         end
@@ -234,22 +249,20 @@ module Machines
       end
 
       def communication_thread_start
-        while true
-          begin
-            connection = RModbus::TCPClient.new @opts[:host], @opts[:port], @opts[:slave_address]
-            @thread_tasks[:queue].synchronize do
-              @thread_tasks[:cond].wait_while { @thread_tasks[:queue].empty? }
-              begin
-                @thread_tasks[:queue].shift.call(connection)
-              rescue Exception => ex
-                notify_exception ex
-              end
+        begin
+          connection = RModbus::TCPClient.new @opts[:host], @opts[:port], @opts[:slave_address]
+          @tasks[:queue].synchronize do
+            @tasks[:cond].wait_while { @tasks[:queue].empty? && !@stopping}
+            begin
+              @tasks[:queue].shift.call(connection) unless @stopping
+            rescue Exception => ex
+              notify_exception ex
             end
-          rescue Exception => ex
-            notify_exception ex
-            sleep(10.0 + 5.0 * rand)
           end
-        end
+        rescue Exception => ex
+          notify_exception ex
+          sleep(10.0 + 5.0 * rand)
+        end until @stopping
       end
     end
   end
