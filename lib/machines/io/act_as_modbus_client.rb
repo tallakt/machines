@@ -9,7 +9,7 @@ module Machines
     # Performing requests are done in private threads and when the results 
     # are ready, they are added to the queue of scheduled tasks in the 
     # Scheduler
-    class ActAsModbusSlave
+    class ActAsModbusClient
       extend Notify
 
       ModbusEntry = Struct.new :signal, :format, :scangroup, :length
@@ -45,7 +45,7 @@ module Machines
         # Start the background threads
         @stopping = false
         @threads = (1..@opts[:threads]).collect do
-          Thread.start do
+          Thread.new do
             communication_thread_start
           end
         end
@@ -249,8 +249,10 @@ module Machines
       end
 
       def communication_thread_start
+        puts 'thread started'
         begin
-          connection = RModbus::TCPClient.new @opts[:host], @opts[:port], @opts[:slave_address]
+          puts 'calling :new'
+          connection = ModBus::TCPClient.new @opts[:host], @opts[:port], @opts[:slave_address]
           @tasks[:queue].synchronize do
             @tasks[:cond].wait_while { @tasks[:queue].empty? && !@stopping}
             begin

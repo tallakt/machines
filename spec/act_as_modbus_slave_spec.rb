@@ -10,13 +10,12 @@ describe ActAsModbusSlave do
   it 'should create a RModbus connection with parametered address, port, slave id' do
     ModBus::TCPClient.should_receive(:new).with('test_addr', 99, 5)
     m = ActAsModbusSlave.new :address => 'test_addr', :port => 99, :slave_id => 5, :threads => 1
-    m.start
-    m.stop
+    m.start.stop
   end
 
   it 'should start the correct number of threads according to paramter' do
-    Thread.should_receive(:start).twice
-    ActAsModbusSlave.new(:threads => 2).start.stop
+    Thread.should_receive(:new).twice.and_return(mock 'thread', :null_object => true)
+    ActAsModbusClient.new(:threads => 2).start.stop
   end
 
   it 'should update a input bool' do
