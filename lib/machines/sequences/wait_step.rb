@@ -1,3 +1,5 @@
+require 'eventmachine'
+
 module Machines
   module Sequences
     class WaitStep < Step
@@ -6,8 +8,8 @@ module Machines
       def initialize(timeout, name = nil)
         super name
         @timeout = timeout
-        t = Timer.new(timeout) { continue! }
-        on_reset { t.reset }
+        t = EventMachine::Timer.new(timeout) { continue! }
+        on_reset { t.cancel }
       end
     end
   end

@@ -1,4 +1,3 @@
-require 'machines/timedomain/timer'
 require 'machines/etc/notify'
 require 'machines/timedomain/discrete'
 

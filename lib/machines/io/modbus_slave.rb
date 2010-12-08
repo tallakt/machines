@@ -1,11 +1,13 @@
 require 'machines/etc/notify'
-require 'machines/timedomain/scheduler'
 require 'rmodbus'
 require 'struct'
 require 'monitor'
+require 'eventmachine'
 
 module Machines
   module IO
+    # THIS CODE WILL NOT WORK AND NEEDS A REWRITE
+    #
     # All methods are assumed to perform in the Scheduler current thread
     # Performing requests are done in private threads and when the results 
     # are ready, they are added to the queue of scheduled tasks in the 
@@ -87,7 +89,7 @@ module Machines
 
         update_helper(@bool_inputs, filter, :block_groups) do |group, connection|
           values = connection.read_multiple_coils(group.first, group.count)
-          Scheduler.at_once do
+          EventMachine::next_tick do
             @bool_inputs.bound(group.first, group.last) do |address, entry|
               entry.signal.v = (values[address - group.first] == 0 ? false : true)
             end
@@ -96,7 +98,7 @@ module Machines
 
         update_helper(@word_inputs, filter, :block_groups) do |group, connection|
           values = connection.read_multiple_registers(group.first, group.count)
-          Scheduler.at_once do 
+          EventMachine::next_tick do 
             @word_inputs.bound(group.first, group.last) do |address, entry|
               handle_word_data(address - group.first, entry, values)
             end

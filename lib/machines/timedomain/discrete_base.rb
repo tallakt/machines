@@ -2,6 +2,7 @@ require 'machines/timedomain/timer'
 require 'machines/timedomain/binary_op_discrete'
 require 'machines/timedomain/negated_discrete'
 require 'machines/etc/notify'
+require 'eventmachine'
 
 module Machines
   module Timedomain
@@ -16,37 +17,59 @@ module Machines
       end
 
       def ton(time)
-        timer = Timer.new time
-        on_re { timer.start }
-        if block_given?
-          on_fe { timer.reset }
-          timer.at_end { yield }
+        memory = {}
+        if block_given? 
+          on_re do
+            memory[:timer] = EventMachine::Timer time { yield }
+          end
+          on_fe do
+            if memory[:timer] 
+              memory_timer.cancel
+            end
+            memory[:timer] = nil
+          end
           self
         else
           result = Discrete.new
+          on_re do
+            memory[:timer] = EventMachine::Timer time { result.v = true }
+          end
           on_fe do
-            timer.reset
+            if memory[:timer] 
+              memory[:timer] .cancel
+            end
+            memory[:timer] = nil
             result.v = false
           end
-          timer.at_end { result.v = true }
           result
         end
       end
 
       def tof(time)
-        timer = Timer.new time
-        on_fe { timer.start }
-        if block_given? 
-          on_re { timer.reset }
-          timer.at_end { yield }
+        memory = {}
+        if block_given?
+          on_fe do
+            memory[:timer] = EventMachine::Timer time { yield }
+          end
+          on_re do
+            if memory[:timer] 
+              memory_timer.cancel
+            end
+            memory[:timer] = nil
+          end
           self
         else
           result = Discrete.new
-          on_re do
-            timer.reset 
-            result.v = true 
+          on_fe do
+            memory[:timer] = EventMachine::Timer time { result.v = false }
           end
-          timer.at_end { result.v = false }
+          on_re do
+            if memory[:timer] 
+              memory_timer.cancel
+            end
+            memory[:timer] = nil
+            result.v = true
+          end
           result
         end
       end

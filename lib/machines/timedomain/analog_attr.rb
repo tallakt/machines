@@ -1,7 +1,7 @@
 require 'machines/timedomain/analog.rb'
 
 class Object
-  def analog_attr(name)
+    def analog_attr(name)
     n = name.to_s
     module_eval <<-EOS
       def #{n}

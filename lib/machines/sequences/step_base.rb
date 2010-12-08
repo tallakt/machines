@@ -1,5 +1,7 @@
 require 'machines/etc/notify.rb'
 require 'machines/timedomain/discrete'
+require 'eventmachine'
+
 
 module Machines
   module Sequences
@@ -39,7 +41,7 @@ module Machines
       
       def start
         if may_start? # may_start? defined in subclass
-          @start_time = Scheduler.current.now
+          @start_time = Time.now
           @active_signal.v = true if @active_signal
           perform_start  # startup must be defined in including class
           notify_enter
@@ -97,8 +99,12 @@ module Machines
         @continue_on_callback = true
       end
 
+      def continue_after(seconds, step = nil)
+        continue_if active_signal.ton(seconds)
+      end
+
       def duration
-        @start_time && (Scheduler.current.now - @start_time)
+        @start_time && (Time.now - @start_time)
       end
 
       def reset
@@ -130,7 +136,7 @@ module Machines
 
       def private_continue(step)
         if may_continue? 
-          Scheduler.current.at_once do 
+          EventMachine::next_tick do
             @prev_duration = duration
             notify_exit
             perform_finish

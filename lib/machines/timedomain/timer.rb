@@ -1,4 +1,4 @@
-require 'machines/timedomain/scheduler'
+require 'eventmachine'
 require 'machines/etc/notify'
 
 module Machines
@@ -12,17 +12,20 @@ module Machines
       def initialize(time)
         @time = time
         @start_time = nil
-        @listeners = []
+        @em_timer = nil
         on_finish { yield } if block_given?
       end
 
       def time=(t)
-        # todo support analog signals
-        @time = t
-        if @start_time
-          Scheduler.current.cancel self
-          do_wait
+        # analog signals
+        if t.respond_to? :on_change
+          @time = t
+          t.on_change { handle_time_change if @time == t }
+        else
+          @time = AnalogConstant.new t
         end
+
+        handle_time_change
       end
 
       def time
@@ -30,21 +33,19 @@ module Machines
       end
 
       def elapsed
-        if @start_time
-          Scheduler.current.now - @start_time
-        else
-          nil
-        end
+        @start_time && (Time.now - @start_time)
       end
 
       def start
-        @start_time = Scheduler.current.now
+        reset
+        @start_time = Time.now
         do_wait
       end
 
       def reset
         @start_time = nil
-        Scheduler.current.cancel self
+        @em_timer.cancel if em_timer
+        @em_timer = nil
       end
 
       def active?
@@ -57,9 +58,22 @@ module Machines
 
       private 
 
+      def handle_time_change
+        if @em_timer
+          @em_timer.cancel
+          @em_timer = nil
+          do_wait
+        end
+      end
+
       def do_wait
-        Scheduler.current.wait_until @start_time + @time, self do
-          @start_time = nil
+        delay = @time.v - (Time.now - @start_time)
+        if delay > 0.0
+          @em_timer = EventMachine::Timer.new(@time - @start_time) do
+            @start_time = @em_timer = nil
+            notify_finish
+          end
+        else
           notify_finish
         end
       end

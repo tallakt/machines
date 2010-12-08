@@ -14,13 +14,8 @@ module Machines
 
       def v=(new_val)
         old_v = @v
-        if new_val
-          @v = true
-          data_change @v unless old_v
-        else
-          @v = false
-          data_change @v if old_v
-        end
+        @v = !!new_val # ensure bool
+        data_change @v if (old_v ^ @v)
       end
 
       private
