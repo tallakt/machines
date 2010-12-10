@@ -2,10 +2,10 @@ include 'machines/timedomain/analog'
 
 module Machines
   module Physical
-    class AnalogConstant < Analog
+    class AnalogConstant < AnalogBase
       attr_reader :v
 
-      def initialize()
+      def initialize
         @name, @description = nil
         @v = value
       end

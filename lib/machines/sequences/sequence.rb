@@ -1,9 +1,8 @@
 include 'machines/sequences/step_base'
 include 'machines/timedomain/wait_step'
 include 'machines/timedomain/timer'
-include 'machines/timedomain/sequencer'
 
-mmodule Machines
+module Machines
   module Sequences
     class Sequence
       include StepBase
@@ -47,12 +46,12 @@ mmodule Machines
         step WaitStep.new time
       end
 
-      def circular(delay = 100)
-        on_exit { Sequencer::wait(delay, self) { start! } }
+      def circular
+        on_exit { EventMachine::next_tick { start! } }
       end
 
       def auto_start
-        Sequencer::at_once { start! }
+        EventMachine::next_tick { start! }
       end
 
       def active?

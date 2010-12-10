@@ -2,3 +2,4 @@
 secret/
 tags
 *.swo
+*.gem

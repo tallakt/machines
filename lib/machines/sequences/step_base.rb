@@ -25,14 +25,14 @@ module Machines
       alias :original_notify_enter :notify_enter
       def notify_enter
         original_notify_enter
-        @active_signal.v = true if @active_signal
+        @active_signal.set! if @active_signal
       end
 
 
       alias :original_notify_exit :notify_exit
       def notify_exit
         original_notify_exit
-        @active_signal.v = false if @active_signal
+        @active_signal.reset! if @active_signal
       end
 
       def finished?
@@ -42,7 +42,7 @@ module Machines
       def start
         if may_start? # may_start? defined in subclass
           @start_time = Time.now
-          @active_signal.v = true if @active_signal
+          @active_signal.set! if @active_signal
           perform_start  # startup must be defined in including class
           notify_enter
 
@@ -141,7 +141,7 @@ module Machines
             notify_exit
             perform_finish
             step.start if step
-            @active_signal.v = false if @active_signal
+            @active_signal.reset! if @active_signal
           end
         end
       end

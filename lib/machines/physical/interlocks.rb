@@ -6,22 +6,21 @@ module Machines
         yield self if block_given?
       end
 
-      def add(description, &condition) 
-        @conditions[condition] = description
+      def add(condition, description = nil) 
+        @conditions[condition] = description || condition.name || ''
       end
 
 
       def unlocked?
-        # all conditions must be true
-        @conditions.keys.inject(true) {|result, cond| result && cond.call } 
+        @conditions.keys.inject {|result, cond| result & cond } 
       end
 
       def interlocked?
-        not unlocked?
+        unlocked?.not
       end
 
       def why
-        @conditions.keys.find {|cond| cond.call? }.map {|cond| @conditions[cond] }
+        @conditions.keys.find {|c| c.v }.map {|c| @conditions[c] }
       end
     end
   end

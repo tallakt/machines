@@ -8,29 +8,25 @@ module Machines
 
     class BinaryOpDiscrete < DiscreteBase
       def initialize(a, b, &op)
-        a.on_change { update }
-        b.on_change { update }
+        a.on_change { recalc_nofify }
+        b.on_change { recalc_nofify }
         @a, @b, @op = a, b, op
-        @v = v
+        @v = recalc
       end
 
       def v
-        @op.call to_discrete(@a), to_discrete(@b)
+        recalc
       end
 
       private
 
 
-      def update
-        old = @v
-        @v = v
-        data_change @v unless old == @v
+      def recalc
+        @op.call to_discrete(@a), to_discrete(@b)
       end
 
-      def data_change(value)
-        notify_re if value
-        notify_fe unless value
-        notify_change
+      def recalc_nofity
+        @v = calc_and_notify(@v) { recalc }
       end
     end
   end

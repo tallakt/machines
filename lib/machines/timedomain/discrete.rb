@@ -13,17 +13,15 @@ module Machines
       end
 
       def v=(new_val)
-        old_v = @v
-        @v = !!new_val # ensure bool
-        data_change @v if (old_v ^ @v)
+        @v = calc_and_notify(@v) { new_val }
       end
 
-      private
+      def set!
+        v = true
+      end
 
-      def data_change(value)
-        notify_re if value
-        notify_fe unless value
-        notify_change
+      def reset!
+        v = false
       end
     end
   end

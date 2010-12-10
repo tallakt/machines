@@ -18,13 +18,8 @@ module Machines
 
       def time=(t)
         # analog signals
-        if t.respond_to? :on_change
-          @time = t
-          t.on_change { handle_time_change if @time == t }
-        else
-          @time = AnalogConstant.new t
-        end
-
+        @time = Analog.to_analog t
+        t.on_change { handle_time_change if @time == t }
         handle_time_change
       end
 
@@ -67,14 +62,14 @@ module Machines
       end
 
       def do_wait
-        delay = @time.v - (Time.now - @start_time)
+        delay = @time.v - elapsed
         if delay > 0.0
           @em_timer = EventMachine::Timer.new(@time - @start_time) do
             @start_time = @em_timer = nil
             notify_finish
           end
         else
-          notify_finish
+          EventMachine::next_tick { notify_finish }
         end
       end
     end
