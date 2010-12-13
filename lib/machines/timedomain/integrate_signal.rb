@@ -1,5 +1,10 @@
+require 'machines/timedomain/sampler'
+
 module Machines
   module Timedomain
+    class AnalogBase
+    end
+
     class IntegrateSignal < AnalogBase
       attr :v
 
@@ -16,7 +21,7 @@ module Machines
           @prev_t = @prev_in = nil
         end
 
-        sampler = options[:sampler] || Sampler.new dt
+        sampler = options[:sampler] || Sampler.new(dt)
         sampler.on_sample { calc }
       end
 
@@ -30,15 +35,11 @@ module Machines
       def calc
         t = Time.now
         if @prev_in && @prev_t
-          @v += (Time.now - @prev_time) * 0.5 * (in.v + @prev_in) 
+          @v += (Time.now - @prev_time) * 0.5 * (@in.v + @prev_in) 
         end
         @prev_t = t
-        @prev_in = in.v
+        @prev_in = @in.v
       end
     end
   end
 end
-~                                                                                                                                      
-~                                                                                                                                      
-~                                                                                                                                      
-~                                                                                                                                      

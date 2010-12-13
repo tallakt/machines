@@ -18,7 +18,7 @@ module Machines
 
       def ton(time)
         if block_given? 
-          timer = Timer.new (time) { yield }
+          timer = Timer.new(time) { yield }
           on_re do
             timer.start
           end
@@ -42,7 +42,7 @@ module Machines
 
       def tof(time)
         if block_given?
-          timer = Timer.new (time) { yield }
+          timer = Timer.new(time) { yield }
           on_fe do
             timer.start
           end

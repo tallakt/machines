@@ -1,4 +1,4 @@
-include 'machines/etc/notify'
+require 'machines/etc/notify'
 
 module Machines
   module Timedomain

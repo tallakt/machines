@@ -2,10 +2,16 @@ require 'machines/etc/notify'
 require 'machines/timedomain/discrete'
 require 'machines/timedomain/integrate_signal'
 require 'machines/timedomain/derivate_signal'
-require 'machines/timedomain/analog_base'
+require 'machines/timedomain/analog'
 
 module Machines
   module Timedomain
+    class AnalogBase
+    end
+
+    class Analog < AnalogBase
+    end
+
     class AnalogBase
       extend Notify
       attr_accessor :name, :description

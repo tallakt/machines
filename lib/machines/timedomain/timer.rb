@@ -1,5 +1,6 @@
 require 'eventmachine'
 require 'machines/etc/notify'
+require 'machines/timedomain/analog_base'
 
 module Machines
   module Timedomain
@@ -10,7 +11,7 @@ module Machines
       alias :at_end :on_finish
 
       def initialize(time)
-        @time = time
+        @time = AnalogBase.to_analog time
         @start_time = nil
         @em_timer = nil
         on_finish { yield } if block_given?
@@ -39,7 +40,7 @@ module Machines
 
       def reset
         @start_time = nil
-        @em_timer.cancel if em_timer
+        @em_timer.cancel if @em_timer
         @em_timer = nil
       end
 
@@ -64,7 +65,7 @@ module Machines
       def do_wait
         delay = @time.v - elapsed
         if delay > 0.0
-          @em_timer = EventMachine::Timer.new(@time - @start_time) do
+          @em_timer = EventMachine::Timer.new(delay) do
             @start_time = @em_timer = nil
             notify_finish
           end
