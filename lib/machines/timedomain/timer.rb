@@ -33,9 +33,13 @@ module Machines
       end
 
       def start
-        reset
-        @start_time = Time.now
-        do_wait
+        if EM::reactor_running?
+          reset
+          @start_time = Time.now
+          do_wait
+        else
+          EM::next_tick { start }
+        end
       end
 
       def reset
@@ -45,11 +49,11 @@ module Machines
       end
 
       def active?
-        @start_time
+        !!@start_time
       end
 
       def idle?
-        not active?
+        !active?
       end
 
       private 

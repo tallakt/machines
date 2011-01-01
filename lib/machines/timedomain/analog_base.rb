@@ -139,7 +139,7 @@ module Machines
       # it will also notify
       def calc_and_notify(old_value)
         new_val = yield
-        notify_change if (new_val != old_val)
+        notify_change if (new_val != old_value)
         new_val
       end
     end
