@@ -13,11 +13,13 @@ describe Timer do
   end
 
   it 'should run for the desired time then stop' do
-    em 1.5 do
+    em 4 do
       @timer.start
       @timer.on_finish do
+        puts 'JUHUUU'
+        raise 'test'
         (Time.now - @t0).should be_close(1.0, 0.010)
-        done
+        raise 'test'
       end
     end
   end
